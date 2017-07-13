@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:defaultValue=""
+        android:dialogTitle="@string/pref_vehicle_id_title"
+        android:key="vehicle_id_preference"
+        android:summary="@string/pref_vehicle_id_summary"
+        android:title="@string/pref_vehicle_id_title" />
     <PreferenceCategory
         android:key="@string/pref_upload_category"
         android:title="@string/pref_upload_category_title">
@@ -11,17 +17,34 @@
             android:summaryOn="@string/pref_upload_summaryOn"
             android:title="@string/pref_upload_title" />
         <EditTextPreference
-            android:defaultValue="http://www.example.com/obd/get_data.php"
+            android:defaultValue="http://retozoss.ch/obd_getdata.php"
             android:dialogTitle="@string/pref_upload_url_title"
             android:key="upload_url_preference"
             android:summary="@string/pref_upload_url_summary"
             android:title="@string/pref_upload_url_title" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="@string/pref_mqtt_category"
+        android:title="@string/pref_mqtt_category_title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dialogTitle="@string/pref_mqtt_title"
+            android:key="mqtt_upload_data_preference"
+            android:summaryOff="@string/pref_mqtt_summary_off"
+            android:summaryOn="@string/pref_mqtt_summary_on"
+            android:title="@string/pref_mqtt_title" />
         <EditTextPreference
-            android:defaultValue=""
-            android:dialogTitle="@string/pref_vehicle_id_title"
-            android:key="vehicle_id_preference"
-            android:summary="@string/pref_vehicle_id_summary"
-            android:title="@string/pref_vehicle_id_title" />
+            android:defaultValue="tcp://test.mosquitto.org:1883"
+            android:dialogTitle="@string/pref_broker_title"
+            android:key="mqtt_broker_address_preference"
+            android:summary="@string/pref_broker_summary"
+            android:title="@string/pref_broker_title" />
+        <EditTextPreference
+            android:defaultValue="car"
+            android:dialogTitle="@string/pref_mqtt_topic_title"
+            android:key="mqtt_topic_preference"
+            android:summary="@string/pref_topic_summary"
+            android:title="@string/pref_mqtt_topic_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/title_pref_bluetooth">
         <CheckBoxPreference

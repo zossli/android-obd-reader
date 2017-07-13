@@ -35,6 +35,9 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
     public static final String BLUETOOTH_LIST_KEY = "bluetooth_list_preference";
     public static final String UPLOAD_URL_KEY = "upload_url_preference";
     public static final String UPLOAD_DATA_KEY = "upload_data_preference";
+    public static final String MQTT_UPLOAD_URL_KEY = "mqtt_broker_address_preference";
+    public static final String MQTT_UPLOAD_DATA_KEY = "mqtt_upload_data_preference";
+    public static final String MQTT_TOPIC = "mqtt_topic_preference";
     public static final String OBD_UPDATE_PERIOD_KEY = "obd_update_period_preference";
     public static final String VEHICLE_ID_KEY = "vehicle_id_preference";
     public static final String ENGINE_DISPLACEMENT_KEY = "engine_displacement_preference";
@@ -314,6 +317,12 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
                         "Couldn't parse '" + newValue.toString() + "' as a number.",
                         Toast.LENGTH_LONG).show();
             }
+        }
+        if (MQTT_UPLOAD_URL_KEY.equals(preference.getKey())) {
+             Toast.makeText(this,
+                        "Please restart the App.",
+                        Toast.LENGTH_LONG).show();
+
         }
         return false;
     }

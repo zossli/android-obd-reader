@@ -46,6 +46,7 @@ import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.config.ObdConfig;
 import com.github.pires.obd.reader.io.AbstractGatewayService;
 import com.github.pires.obd.reader.io.LogCSVWriter;
+import com.github.pires.obd.reader.io.MQTTSender;
 import com.github.pires.obd.reader.io.MockObdGatewayService;
 import com.github.pires.obd.reader.io.ObdCommandJob;
 import com.github.pires.obd.reader.io.ObdGatewayService;
@@ -55,6 +56,12 @@ import com.github.pires.obd.reader.net.ObdService;
 import com.github.pires.obd.reader.trips.TripLog;
 import com.github.pires.obd.reader.trips.TripRecord;
 import com.google.inject.Inject;
+
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -95,6 +102,9 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     private static final int REQUEST_ENABLE_BT = 1234;
     private static boolean bluetoothDefaultIsEnable = false;
 
+    private MqttAndroidClient client;
+
+
     static {
         RoboGuice.setUseAnnotationDatabases(false);
     }
@@ -108,6 +118,7 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     /// the trip log
     private TripLog triplog;
     private TripRecord currentTrip;
+    private Context context;
 
     @InjectView(R.id.compass_text)
     private TextView compass;
@@ -275,13 +286,16 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
             if(isServiceBound)
                 obdStatusTextView.setText(getString(R.string.status_obd_data));
         }
-
+        if (prefs.getBoolean(ConfigActivity.MQTT_UPLOAD_DATA_KEY, false)) {
+            MQTTSender.sendMessage(prefs, client, cmdID, cmdResult);
+        }
         if (vv.findViewWithTag(cmdID) != null) {
             TextView existingTV = (TextView) vv.findViewWithTag(cmdID);
             existingTV.setText(cmdResult);
         } else addTableRow(cmdID, cmdName, cmdResult);
         commandResult.put(cmdID, cmdResult);
         updateTripStatistic(job, cmdID);
+
     }
 
     private boolean gpsInit() {
@@ -338,6 +352,11 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
         triplog = TripLog.getInstance(this.getApplicationContext());
         
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
+
+        context = getApplicationContext();
+
+
+
     }
 
     @Override
@@ -448,7 +467,34 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     }
 
     private void startLiveData() {
+        Log.d(TAG, "Connect to MQTT Broker");
+        String clientId = MqttClient.generateClientId();
+        client = new MqttAndroidClient(this.getApplicationContext(), prefs.getString(ConfigActivity.MQTT_UPLOAD_URL_KEY,""),
+                clientId);
+        try {
+            IMqttToken token = client.connect();
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    // We are connected
+                    Log.d(TAG, "mqtt connection to "+ client.getServerURI()+" successful");
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    // Something went wrong e.g. connection timeout or firewall problems
+                    Log.d(TAG, "mqtt failed to connect to" + client.getServerURI());
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
+
         Log.d(TAG, "Starting live data..");
+
+
 
         tl.removeAllViews(); //start fresh
         doBindService();
@@ -486,6 +532,8 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     }
 
     private void stopLiveData() {
+
+
         Log.d(TAG, "Stopping live data..");
 
         gpsStop();
@@ -519,6 +567,7 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
         if (myCSVWriter != null) {
             myCSVWriter.closeLogCSVWriter();
         }
+
     }
 
     protected void endTrip() {
@@ -631,6 +680,12 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
             unbindService(serviceConn);
             isServiceBound = false;
             obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
+        }
+        Log.d(TAG, "Disconnect MQTT Broker");
+        try {
+            client.disconnect();
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
     }
 

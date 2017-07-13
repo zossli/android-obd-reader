@@ -106,4 +106,13 @@
     <string name="pref_dev_email_title">Developer Email</string>
     <string name="pref_dev_email_summary">Logs will be emailed to this address</string>
     <string name="text_noerrors">There were no errors found.!</string>
+    <string name="pref_mqtt_title">Enable MQTT</string>
+    <string name="pref_mqtt_summary_off">Enable MQTT Upload</string>
+    <string name="pref_mqtt_summary_on">Disable MQTT Upload</string>
+    <string name="pref_broker_title">Broker Address</string>
+    <string name="pref_broker_summary">Broker Protocol, Address and Port</string>
+    <string name="pref_mqtt_category">mqtt_category</string>
+    <string name="pref_mqtt_category_title">MQTT Communication</string>
+    <string name="pref_mqtt_topic_title">First-Topic</string>
+    <string name="pref_topic_summary"><![CDATA[Change first Topic for the MQTT Message. Topic will be set like <<First-Topic>>/<<Vehicle ID>>. Enter it without a /]]></string>
 </resources>
